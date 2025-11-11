@@ -39,6 +39,7 @@ export default async function handler(req, res) {
     });
 
     if (!authResponse.ok) {
+        console.log(authResponse)
       return res.redirect("/oauth/error?error=code_exchange_failed");
     }
 
