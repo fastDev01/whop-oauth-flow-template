@@ -9,9 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@whop/api": "^0.0.51",
+    "next": "16.0.1",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "next": "16.0.1"
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
     "eslint": "^9",

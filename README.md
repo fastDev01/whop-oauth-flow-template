@@ -1,40 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# 🪪 Whop OAuth Integration (Next.js Pages Router)
 
-## Getting Started
+This example shows how to implement **Login with Whop** using the Whop OAuth API in a **Next.js (Pages Router)** app.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ⚙️ Setup
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 1. Configure your redirect URL inside Whop
+In your Whop developer dashboard, go to your **App Settings → OAuth → Redirect URIs** and add:  
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+http://localhost:3000/api/oauth/callback
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+This must exactly match the redirect URI used in your API route.
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+### 2. Add required environment variables
 
-To learn more about Next.js, take a look at the following resources:
+Create a `.env.local` file in your project root and define:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+WHOP_API_KEY=
+NEXT_PUBLIC_WHOP_APP_ID=
+NEXT_PUBLIC_WHOP_AGENT_USER_ID=
+NEXT_PUBLIC_WHOP_COMPANY_ID=
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+These values come from your Whop Developer Dashboard.  
+⚠️ **Do not commit them** to version control.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+## 🔁 OAuth Flow Overview
+
+1. **User clicks “Login with Whop”**  
+   - The link points to `/api/oauth/init?next=/home`.
+   - This route creates an authorization URL using Whop’s SDK and redirects the user to Whop’s consent page.
+
+2. **User authorizes your app on Whop**  
+   - Whop redirects back to your callback endpoint:  
+     `/api/oauth/callback?code=...&state=...`
+
+3. **Callback exchanges code for access token**  
+   - Your `/api/oauth/callback` route verifies the state cookie.  
+   - Then it calls `whopApi.oauth.exchangeCode()` to get an access token.  
+   - The token is stored in a secure `HttpOnly` cookie named `whop_access_token`.
+
+4. **User is redirected to `/home`**  
+   - `/home` checks if the `whop_access_token` cookie exists.  
+   - If present → shows success message and token.  
+   - If missing → shows an error prompt.
+
+---
+
+## 📁 File Structure
+
+pages/
+│
+├── api/
+│ └── oauth/
+│ ├── init.js # Starts OAuth login and sets state cookie
+│ └── callback.js # Handles OAuth callback and stores token
+│
+├── login.js # Simple page with “Login with Whop” button
+└── home.js # Displays success or error based on cookie
+
+
+---
+
+## ▶️ Usage
+
+1. Start your app:
+   ```bash
+   npm run dev
+
+2. Visit:
+    http://localhost:3000/login
+
+3. Click “Login with Whop”.
+
+4. Complete the OAuth flow on Whop.
+
+5. You’ll be redirected to /home, which will confirm success or show an error.
+    
+✅ Notes
+
+- The token cookie (whop_access_token) is for demonstration only.
+In production, store it securely (e.g., encrypted session, backend DB).
+
+- The example uses plain JavaScript and the Next.js Pages Router — no TypeScript or App Router.
+
+- Always keep your WHOP_API_KEY private and never expose it to the client.
