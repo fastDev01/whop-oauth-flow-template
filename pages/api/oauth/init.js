@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   const next = typeof req.query.next === "string" ? req.query.next : "/home";
 
   const { url: authUrl, state } = whopApi.oauth.getAuthorizationUrl({
-    redirectUri: "http://localhost:3000/api/oauth/callback",
+    redirectUri: "https://whop-oauth-flow-template.vercel.app/api/oauth/callback",
     scope: ["read_user"],
   });
 
